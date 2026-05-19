@@ -112,12 +112,15 @@ function getLearnerData(ci, ag, ls) {
         let learn = {};
         let newId = 0;
         for (const eachSubmit of ls) {   //console.log(ls[l]);
+            
             const assignmentInfo = getAssignmentInfo(allAssignments, eachSubmit.assignment_id);
+            
             if (assignmentInfo == null){
-                console.log (`This ${eachSubmit.assignment_id} assignment id is not valid.`);
+                console.log (`This "${eachSubmit.assignment_id}" assignment id is not valid.`);
                 continue;
             }    
-            console.log(assignmentInfo, "    df  ",eachSubmit.assignment_id); break;
+            break;
+            
             //const assignment = getLernerAssignment(allAssignments, eachSubmit);
             /*
             if (newId !== l.learner_id){ 
@@ -145,12 +148,24 @@ function getLearnerData(ci, ag, ls) {
 
 function getAssignmentInfo(allAssignments, assignedId) {
     try{
+        let assignInfo = null;
+        if(allAssignments == null){
+            throw ("There is not any assignment information.");
+        }  
+
         for (const assigmentInfo of allAssignments){
             if (assigmentInfo.id === assignedId){
-                return assigmentInfo;
+                assignInfo = assigmentInfo;
+                break;
             }
         }
-        return null
+
+        if(assignInfo != null){
+            return assignInfo;
+        }else{
+            return null;
+        }
+        
     }catch(e){
         console.log(e);
     }
