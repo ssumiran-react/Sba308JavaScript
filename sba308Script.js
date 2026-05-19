@@ -99,7 +99,7 @@ const result = [
   ];
 */
 //Output:  an array of objects,
-function getLearnerData(ci, ag, ls) {
+function getLearnerData(ci, ag, ls, numLs) {
     let learners = [];
 
     try {
@@ -111,57 +111,64 @@ function getLearnerData(ci, ag, ls) {
 
         let learn = {};
         let newId = 0;
-        for (const eachSubmit of ls) {   //console.log(ls[l]);
-            const assignmentInfo = getAssignmentInfo(allAssignments, eachSubmit.assignment_id);
+        let sumScore = 0;
+        let sumPointPassible = 0;
+        //for (const eachSubmit of ls) {   
+        for (let i = 0; i < numLs; i++) {
+            const assignmentInfo = getAssignmentInfo(allAssignments, ls[i].assignment_id);
 
             if (assignmentInfo == null) {
-                console.log(`This "${eachSubmit.assignment_id}" assignment id is not valid.`);
+                console.log(`This "${ls[i].assignment_id}" assignment id is not valid.`);
                 continue;
             }
 
             //assignment point is 0 thus divide by 0 check
-            if (Number(assignmentInfo.points_possible) === 0){
+            if (assignmentInfo.points_possible == 0) {
                 throw ("Invalid division by 0");
             }
 
             //assignment due date is today or pass date
             if (new Date(assignmentInfo.due_at) > new Date()) {
                 continue;
-            }else{    
-                const learnAssignment = calculateAssignment(assignmentInfo, eachSubmit.submission);
-                console.log(" al ",learnAssignment);
-                if(newId == eachSubmit.learner_id){
-                    
-                }else{
-                    newId = eachSubmit.learner_id;
+            } else {
+                const learnAssignment = calculateAssignment(assignmentInfo, ls[i].submission);
+                //console.log(learnAssignment, "   la   ", ls[i].learner_id);
+
+                if (newId != ls[i].learner_id) {
+                    if (newId !== 0) {
+                        learners.splice(1, 0, learn);
+                        learn = {};
+                    }
+                    newId = ls[i].learner_id;
                     learn["id"] = newId;
-                    
+                    learn["avg"] = 0;
+                    sumScore = 0;
+                    sumPointPassible = 0;
+
                 }
-            break;
-            /*
 
+                learn[assignmentInfo.id.toString()] = learnAssignment[assignmentInfo.id.toString()];
+                sumScore += Number(learnAssignment.score);
+                sumPointPassible += Number(assignmentInfo.points_possible);
+                learn.avg = sumScore / sumPointPassible;
 
-            if (newId !== l.learner_id){ 
-                newId = l.learner_id;
-                learn["id"] = l.learner_id;
+                //console.log("lear: ", learn);
+                if (i == numLs - 1) {
+                    learners.splice(1, 0, learn);
 
-                if (learn != null){
-                    learners.push(learn);
                 }
-                console.log(learners," not same id ",learn);
-                learn = {};
-            }
-            */
+
             }
         }
 
+        //console.log("  dfa  ", learners);
         return learners;
 
     } catch (err) {
         console.log(err);
         return null;
     } finally {
-        console.log("Thank you for taking the Course and submiting assignments.");
+        console.log("Thank you for taking the Course and submiting the assignments.");
     }
 }
 
@@ -193,31 +200,28 @@ function getAssignmentInfo(allAssignments, assignedId) {
 function calculateAssignment(info, submitted) {
     let assignment = {};
     let isLate = false;
-    console.log(info, " info.due_at  assignmentInfo :", submitted);
+    //console.log(info, " info.due_at  assignmentInfo :", submitted);
 
     try {
-        if (Number(info.points_possible) === 0){
+        if (Number(info.points_possible) === 0) {
             throw ("Invalid division by 0")
         }
         //assignment due date is today or pass date
         if (new Date(info.due_at) <= new Date()) {
-            
 
-            
             //if submit date is late 
             if (new Date(submitted.submitted_at) > new Date(info.due_at)) {
                 isLate = true;
             }
 
-            if(isLate){
+            if (isLate) {
                 assignment["score"] = submitted.score - (Number(info.points_possible) * 0.1);
-            }else {
+            } else {
                 assignment["score"] = submitted.score;
             }
 
-            let aId = info.id.toString();
-            assignment[aId] = assignment.score / info.points_possible;
-            //console.log("assignment   :",assignment);
+            assignment[info.id.toString()] = assignment.score / info.points_possible;
+            //console.log("assignment   :",assignment[info.id.toString()]);
             return assignment;
         } else {
             console.log("Assignment is not due.");
@@ -243,8 +247,8 @@ function calculateAssignment(info, submitted) {
     */
 }
 
-const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-//console.log(result);
+const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions, LearnerSubmissions.length);
+console.log(result);
 
 /* Logic - Instruction
 -If an AssignmentGroup does not belong to its course 
