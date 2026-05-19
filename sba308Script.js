@@ -13,7 +13,7 @@ const AssignmentGroup = {
         {
             id: 1,
             name: "Declare a Variable",
-            due_at: "2023-01-25",
+            due_at: "2023-01-24",
             points_possible: 50
         },
         {
@@ -112,17 +112,35 @@ function getLearnerData(ci, ag, ls) {
         let learn = {};
         let newId = 0;
         for (const eachSubmit of ls) {   //console.log(ls[l]);
-            
             const assignmentInfo = getAssignmentInfo(allAssignments, eachSubmit.assignment_id);
-            
-            if (assignmentInfo == null){
-                console.log (`This "${eachSubmit.assignment_id}" assignment id is not valid.`);
+
+            if (assignmentInfo == null) {
+                console.log(`This "${eachSubmit.assignment_id}" assignment id is not valid.`);
                 continue;
-            }    
+            }
+
+            //assignment point is 0 thus divide by 0 check
+            if (Number(assignmentInfo.points_possible) === 0){
+                throw ("Invalid division by 0");
+            }
+
+            //assignment due date is today or pass date
+            if (new Date(assignmentInfo.due_at) > new Date()) {
+                continue;
+            }else{    
+                const learnAssignment = calculateAssignment(assignmentInfo, eachSubmit.submission);
+                console.log(" al ",learnAssignment);
+                if(newId == eachSubmit.learner_id){
+                    
+                }else{
+                    newId = eachSubmit.learner_id;
+                    learn["id"] = newId;
+                    
+                }
             break;
-            
-            //const assignment = getLernerAssignment(allAssignments, eachSubmit);
             /*
+
+
             if (newId !== l.learner_id){ 
                 newId = l.learner_id;
                 learn["id"] = l.learner_id;
@@ -134,6 +152,7 @@ function getLearnerData(ci, ag, ls) {
                 learn = {};
             }
             */
+            }
         }
 
         return learners;
@@ -147,38 +166,81 @@ function getLearnerData(ci, ag, ls) {
 }
 
 function getAssignmentInfo(allAssignments, assignedId) {
-    try{
+    try {
         let assignInfo = null;
-        if(allAssignments == null){
+        if (allAssignments == null) {
             throw ("There is not any assignment information.");
-        }  
+        }
 
-        for (const assigmentInfo of allAssignments){
-            if (assigmentInfo.id === assignedId){
-                assignInfo = assigmentInfo;
+        for (const a in allAssignments) {
+            if (allAssignments[a].id === assignedId) {
+                assignInfo = allAssignments[a];
                 break;
             }
         }
 
-        if(assignInfo != null){
+        if (assignInfo != null) {
             return assignInfo;
-        }else{
+        } else {
             return null;
         }
-        
-    }catch(e){
+
+    } catch (e) {
         console.log(e);
     }
 }
 
-function getLernerAssignment(allAssignments, eachSubmit) {
-    let eachAssign = [];
-    console.log(eachSubmit, "   allAssignments :", allAssignments);
-    //for (const s of submission)
-    //"id"
-    //"avg"
-    //<assignment_id>: number,
-    //return eachSubmit;
+function calculateAssignment(info, submitted) {
+    let assignment = {};
+    let isLate = false;
+    console.log(info, " info.due_at  assignmentInfo :", submitted);
+
+    try {
+        if (Number(info.points_possible) === 0){
+            throw ("Invalid division by 0")
+        }
+        //assignment due date is today or pass date
+        if (new Date(info.due_at) <= new Date()) {
+            
+
+            
+            //if submit date is late 
+            if (new Date(submitted.submitted_at) > new Date(info.due_at)) {
+                isLate = true;
+            }
+
+            if(isLate){
+                assignment["score"] = submitted.score - (Number(info.points_possible) * 0.1);
+            }else {
+                assignment["score"] = submitted.score;
+            }
+
+            let aId = info.id.toString();
+            assignment[aId] = assignment.score / info.points_possible;
+            //console.log("assignment   :",assignment);
+            return assignment;
+        } else {
+            console.log("Assignment is not due.");
+            return null;
+        }
+    } catch (err) {
+        console.log(err.name);
+    }
+
+    /*{
+      id: 1,
+      name: "Declare a Variable",
+      due_at: "2023-01-25",
+      points_possible: 50
+    }
+
+    learner_id: 125,
+    assignment_id: 1,
+    submission: {
+      submitted_at: "2023-01-25",
+      score: 47
+    }
+    */
 }
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
