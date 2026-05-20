@@ -115,8 +115,8 @@ function getLearnerData(ci, ag, ls, numLs) {
                 continue;
             } else {
                 const learnAssignment = calculateAssignment(assignmentInfo, ls[i].submission);
-                console.log(assignmentInfo, "   aInfo   ", ls[i].submission.score);
-                console.log(learnAssignment, "   la   ", ls[i].learner_id);
+                //console.log(assignmentInfo, "   aInfo   ", ls[i].submission.score);
+                //console.log(learnAssignment, "   la   ", ls[i].learner_id);
 
                 if (newId != ls[i].learner_id) {
                     if (newId !== 0) {
@@ -134,13 +134,13 @@ function getLearnerData(ci, ag, ls, numLs) {
                 sumScore += Number(learnAssignment.score);
                 sumPointPassible += Number(assignmentInfo.points_possible);
                 learn.avg = sumScore / sumPointPassible;
-                console.log(sumScore ,"  :score/point:   ", sumPointPassible);
+                //console.log(sumScore ,"  :score/point:   ", sumPointPassible);
 
                 if (i == numLs - 1) {
                     learners.splice(1, 0, learn);
                 }
             }
-        }   console.log("  dfa  ", learners);
+        }   //console.log("  dfa  ", learners);
         return learners;
 
     } catch (err) {
@@ -164,13 +164,8 @@ function getAssignmentInfo(allAssignments, assignedId) {
                 break;
             }
         }
-
-        if (assignInfo != null) {
-            return assignInfo;
-        } else {
-            return null;
-        }
-
+        return assignInfo;
+        
     } catch (e) {
         console.log(e);
     }
@@ -178,7 +173,7 @@ function getAssignmentInfo(allAssignments, assignedId) {
 
 function calculateAssignment(info, submitted) {
     let assignment = {};
-    let isLate = false;         console.log(info, " info.due_at  assignmentInfo :", submitted);
+    let isLate = false;         //console.log(info, " info.due_at  assignmentInfo :", submitted);
 
     try {
         if (Number(info.points_possible) === 0) {
@@ -197,9 +192,9 @@ function calculateAssignment(info, submitted) {
             } else {
                 assignment["score"] = submitted.score;
             }
-            console.log(assignment.score ,"  assignment   :",info.points_possible);
+            //console.log(assignment.score ,"  assignment   :",info.points_possible);
             assignment[info.id.toString()] = (assignment.score / info.points_possible).toFixed(2);
-            console.log("assignment   :",assignment[info.id.toString()]);
+            //console.log("assignment   :",assignment[info.id.toString()]);
             return assignment;
         } else {
             console.log("Assignment is not due.");
@@ -208,21 +203,6 @@ function calculateAssignment(info, submitted) {
     } catch (err) {
         console.log(err.name);
     }
-
-    /*{
-      id: 1,
-      name: "Declare a Variable",
-      due_at: "2023-01-25",
-      points_possible: 50
-    }
-
-    learner_id: 125,
-    assignment_id: 1,
-    submission: {
-      submitted_at: "2023-01-25",
-      score: 47
-    }
-    */
 }
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions, LearnerSubmissions.length);
