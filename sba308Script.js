@@ -132,7 +132,8 @@ function getLearnerData(ci, ag, ls, numLs) {
                 continue;
             } else {
                 const learnAssignment = calculateAssignment(assignmentInfo, ls[i].submission);
-                //console.log(learnAssignment, "   la   ", ls[i].learner_id);
+                console.log(assignmentInfo, "   aInfo   ", ls[i].submission.score);
+                console.log(learnAssignment, "   la   ", ls[i].learner_id);
 
                 if (newId != ls[i].learner_id) {
                     if (newId !== 0) {
@@ -144,24 +145,19 @@ function getLearnerData(ci, ag, ls, numLs) {
                     learn["avg"] = 0;
                     sumScore = 0;
                     sumPointPassible = 0;
-
                 }
 
                 learn[assignmentInfo.id.toString()] = learnAssignment[assignmentInfo.id.toString()];
                 sumScore += Number(learnAssignment.score);
                 sumPointPassible += Number(assignmentInfo.points_possible);
                 learn.avg = sumScore / sumPointPassible;
+                console.log(sumScore ,"  :score/point:   ", sumPointPassible);
 
-                //console.log("lear: ", learn);
                 if (i == numLs - 1) {
                     learners.splice(1, 0, learn);
-
                 }
-
             }
-        }
-
-        //console.log("  dfa  ", learners);
+        }   console.log("  dfa  ", learners);
         return learners;
 
     } catch (err) {
@@ -199,8 +195,7 @@ function getAssignmentInfo(allAssignments, assignedId) {
 
 function calculateAssignment(info, submitted) {
     let assignment = {};
-    let isLate = false;
-    //console.log(info, " info.due_at  assignmentInfo :", submitted);
+    let isLate = false;         console.log(info, " info.due_at  assignmentInfo :", submitted);
 
     try {
         if (Number(info.points_possible) === 0) {
@@ -214,14 +209,14 @@ function calculateAssignment(info, submitted) {
                 isLate = true;
             }
 
-            if (isLate) {
+            if (isLate) { 
                 assignment["score"] = submitted.score - (Number(info.points_possible) * 0.1);
             } else {
                 assignment["score"] = submitted.score;
             }
-
-            assignment[info.id.toString()] = assignment.score / info.points_possible;
-            //console.log("assignment   :",assignment[info.id.toString()]);
+            console.log(assignment.score ,"  assignment   :",info.points_possible);
+            assignment[info.id.toString()] = (assignment.score / info.points_possible).toFixed(2);
+            console.log("assignment   :",assignment[info.id.toString()]);
             return assignment;
         } else {
             console.log("Assignment is not due.");
